@@ -17,6 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../ModAPI/ModAPI.csproj" />
+    <ProjectReference Include="../ModAPI.Core/ModAPI.Core.csproj" />
   </ItemGroup>
 </Project>
