@@ -1,0 +1,92 @@
+﻿using System.Reflection;
+using System.Xml.Linq;
+using HarmonyLib;
+using ModAPI.Logging;
+
+namespace ModLoader
+{
+    public class ModMain 
+    {
+        public void Init() 
+        {
+            ConsoleLogger logger = new ConsoleLogger("ModMeria");
+            Console.SetOut(new LoggerTextWriter());
+            try
+            {
+                logger.Info("Initializing...");
+
+                if (!Directory.Exists("Mods"))
+                {
+                    logger.Info("Creating Mods directory");
+                    Directory.CreateDirectory("Mods");
+                }
+
+                if (!File.Exists("Mods/Mods.xml"))
+                {
+                    XElement root = new XElement("Mods");
+                    
+                    var modDirectories = Directory.GetDirectories("Mods");
+
+                    foreach (var modDirectory in modDirectories)
+                    {
+                        XElement modElement = new XElement("Mod", new XElement("Name", Path.GetFileName(modDirectory)), new XElement("Enabled", true));
+                        
+                        root.Add(modElement);
+                    }
+                    
+                    XDocument modDocument = new XDocument(new XDeclaration("1.0", "utf-8", null), root);
+                    modDocument.Save("Mods/Mods.xml");
+                }
+                else 
+                {
+                    XDocument modDocument = XDocument.Load("Mods/Mods.xml");
+                    if (modDocument.Root == null)
+                    {
+                        logger.Warn("Mods/Mods.xml does not have root element. New mods could not be added. HINT: Delete Mods/Mods.xml. This WILL remove mod order!!!");
+                        return;
+                    }
+
+                    XElement root = modDocument.Root;
+                    var modDirectories = Directory.GetDirectories("Mods");
+
+                    foreach (var modDirectory in modDirectories)
+                    {
+                        var modName = Path.GetFileName(modDirectory);
+                        var modElement = root.Elements("Mod").FirstOrDefault(mod => mod.Element("Name")?.Value == modName);
+
+                        if (modElement == null)
+                        {
+                            logger.Debug($"New mod {modName} found. Adding to mod list");
+                            XElement newModElement = new XElement("Mod", new XElement("Name", modName), new XElement("Enabled", true));
+                            root.Add(newModElement);
+                        }
+                    }
+
+                    foreach (var modElement in root.Elements("Mod").ToList())
+                    {
+                        var modName = modElement.Element("Name")?.Value;
+                        if (modName == null || !modDirectories.Contains(Path.Combine("Mods/", modName)))
+                        {
+                            logger.Warn("There was a removed mod");
+                            modElement.Remove();
+                        }
+                    }
+                    
+                    modDocument.Save("Mods/Mods.xml");
+
+                }
+                
+                var harmony = new Harmony("io.github.ggkkaa.modmeria");
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+                logger.Info("Loaded!");
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Error during Harmony initialization: " + ex.Message);
+                Console.WriteLine(ex.StackTrace);
+            }
+        }
+    }
+    
+}
+
