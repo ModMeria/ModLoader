@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Xml.Linq;
 using HarmonyLib;
+using ModAPI.Abstractions;
 using ModAPI.Core.Logging;
 
 namespace ModLoader
@@ -77,6 +78,63 @@ namespace ModLoader
                 }
                 
                 var harmony = new Harmony("io.github.ggkkaa.modmeria");
+                XDocument modDoc = XDocument.Load("Mods/Mods.xml");
+                if (modDoc.Root == null)
+                {
+                    logger.Warn("Mods/Mods.xml does not have root element. Mods could not be added. HINT: Delete Mods/Mods.xml. This WILL remove mod order!!!");
+                    return;
+                }
+                
+                logger.Info("Loading mods...");
+                
+                XElement mods = modDoc.Root;
+
+                foreach (var modElement in mods.Elements("Mod"))
+                {
+                    var modName = modElement.Element("Name")?.Value;
+                    var isEnabled = bool.Parse(modElement.Element("Enabled")?.Value ?? "false");
+
+                    if (modName == null || !isEnabled)
+                    {
+                        logger.Warn($"Skipping mod {modName}");
+                        continue;
+                    }
+                    
+                    string modAssemblyPath = Path.Combine("Mods", modName, $"{modName}.dll");
+
+                    if (File.Exists(modAssemblyPath))
+                    {
+                        try
+                        {
+                            var modAssembly = Assembly.LoadFrom(modAssemblyPath);
+                            harmony.PatchAll(modAssembly);
+                            logger.Info($"Mod {modName} loaded successfully");
+
+                            var modType = modAssembly.GetType($"{modName}.Mod");
+                            if (modType != null && typeof(IMod).IsAssignableFrom(modType))
+                            {
+                                
+                                var modInstance = Activator.CreateInstance(modType) as IMod;
+                                modInstance?.Init();
+                            } else {
+                                logger.Warn($"Mod {modName} could not be Init");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error($"Mod {modName} couldn't be loaded: {ex.Message}");
+                            if (ex.StackTrace != null)
+                            {
+                                logger.Debug(ex.StackTrace);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        logger.Warn($"Mod {modName} has no .dll!");
+                    }
+                }
+                
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
                 logger.Info("Loaded!");
             }
