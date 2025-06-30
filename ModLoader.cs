@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Xml.Linq;
 using HarmonyLib;
-using ModAPI.Logging;
+using ModAPI.Core.Logging;
 
 namespace ModLoader
 {
