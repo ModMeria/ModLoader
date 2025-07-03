@@ -2,6 +2,7 @@
 using System.Xml.Linq;
 using HarmonyLib;
 using ModAPI.Abstractions;
+using ModAPI.Core;
 using ModAPI.Core.Logging;
 
 namespace ModLoader
@@ -115,7 +116,7 @@ namespace ModLoader
                             {
                                 
                                 var modInstance = Activator.CreateInstance(modType) as IMod;
-                                modInstance?.Init();
+                                modInstance?.Init(new ModApi());
                             } else {
                                 logger.Warn($"Mod {modName} could not be Init");
                             }
