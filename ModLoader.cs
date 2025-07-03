@@ -4,6 +4,7 @@ using HarmonyLib;
 using ModAPI.Abstractions;
 using ModAPI.Core;
 using ModAPI.Core.Logging;
+using SingleFileExtractor.Core;
 
 namespace ModLoader
 {
@@ -17,6 +18,15 @@ namespace ModLoader
             {
                 logger.Info("Initializing...");
 
+                if (!File.Exists("PocketBlocks.dll"))
+                {
+                    var reader = new ExecutableReader("PocketBlocks");
+                    if (reader.IsSingleFile)
+                    {
+                        reader.ExtractToDirectoryAsync("modloader/");
+                    }
+                }
+                
                 if (!Directory.Exists("Mods"))
                 {
                     logger.Info("Creating Mods directory");
@@ -116,7 +126,8 @@ namespace ModLoader
                             {
                                 
                                 var modInstance = Activator.CreateInstance(modType) as IMod;
-                                modInstance?.Init(new ModApi());
+                                IModApi api = new ModApi();
+                                modInstance?.Init(api);
                             } else {
                                 logger.Warn($"Mod {modName} could not be Init");
                             }

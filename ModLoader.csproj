@@ -4,10 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Lib.Harmony" Version="2.3.6" />
+    <PackageReference Include="SingleFileExtractor.Core" Version="2.3.0" />
   </ItemGroup>
   
   <ItemGroup>
