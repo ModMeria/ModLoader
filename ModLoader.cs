@@ -10,7 +10,7 @@ namespace ModLoader
 {
     public class ModMain 
     {
-        public void Init() 
+        public static void Init() 
         {
             ConsoleLogger logger = new ConsoleLogger("ModMeria");
             Console.SetOut(new LoggerTextWriter());
@@ -18,26 +18,44 @@ namespace ModLoader
             {
                 logger.Info("Initializing...");
 
-                if (!File.Exists("PocketBlocks.dll"))
+/*                if (!File.Exists("PocketBlocks.dll"))
                 {
                     var reader = new ExecutableReader("PocketBlocks");
+
                     if (reader.IsSingleFile)
                     {
-                        reader.ExtractToDirectoryAsync("modloader/");
+                        var bundle = reader.Bundle;
+
+                        var entry = bundle.Files
+                            .FirstOrDefault(e => Path.GetFileName(e.RelativePath).EndsWith("PocketBlocks.dll", StringComparison.OrdinalIgnoreCase));
+
+                        if (entry != null)
+                        {
+                            entry.ExtractToFile("PocketBlocks.dll");
+                            Console.WriteLine("Extracted PocketBlocks.dll successfully.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("PocketBlocks.dll not found in manifest entries.");
+                        }
                     }
-                }
+                    else
+                    {
+                        Console.WriteLine("Not a single-file executable or unsupported format.");
+                    }
+                }*/
                 
-                if (!Directory.Exists("Mods"))
+                if (!Directory.Exists("mods"))
                 {
-                    logger.Info("Creating Mods directory");
-                    Directory.CreateDirectory("Mods");
+                    logger.Info("Creating mods directory");
+                    Directory.CreateDirectory("mods");
                 }
 
-                if (!File.Exists("Mods/Mods.xml"))
+                if (!File.Exists("mods/mods.xml"))
                 {
-                    XElement root = new XElement("Mods");
+                    XElement root = new XElement("mods");
                     
-                    var modDirectories = Directory.GetDirectories("Mods");
+                    var modDirectories = Directory.GetDirectories("mods");
 
                     foreach (var modDirectory in modDirectories)
                     {
@@ -47,19 +65,19 @@ namespace ModLoader
                     }
                     
                     XDocument modDocument = new XDocument(new XDeclaration("1.0", "utf-8", null), root);
-                    modDocument.Save("Mods/Mods.xml");
+                    modDocument.Save("mods/mods.xml");
                 }
                 else 
                 {
-                    XDocument modDocument = XDocument.Load("Mods/Mods.xml");
+                    XDocument modDocument = XDocument.Load("mods/mods.xml");
                     if (modDocument.Root == null)
                     {
-                        logger.Warn("Mods/Mods.xml does not have root element. New mods could not be added. HINT: Delete Mods/Mods.xml. This WILL remove mod order!!!");
+                        logger.Warn("mods/mods.xml does not have root element. New mods could not be added. HINT: Delete mods/mods.xml. This WILL remove mod order!!!");
                         return;
                     }
 
                     XElement root = modDocument.Root;
-                    var modDirectories = Directory.GetDirectories("Mods");
+                    var modDirectories = Directory.GetDirectories("mods");
 
                     foreach (var modDirectory in modDirectories)
                     {
@@ -77,22 +95,22 @@ namespace ModLoader
                     foreach (var modElement in root.Elements("Mod").ToList())
                     {
                         var modName = modElement.Element("Name")?.Value;
-                        if (modName == null || !modDirectories.Contains(Path.Combine("Mods/", modName)))
+                        if (modName == null || !modDirectories.Contains(Path.Combine("mods/", modName)))
                         {
                             logger.Warn("There was a removed mod");
                             modElement.Remove();
                         }
                     }
                     
-                    modDocument.Save("Mods/Mods.xml");
+                    modDocument.Save("mods/mods.xml");
 
                 }
                 
                 var harmony = new Harmony("io.github.ggkkaa.modmeria");
-                XDocument modDoc = XDocument.Load("Mods/Mods.xml");
+                XDocument modDoc = XDocument.Load("mods/mods.xml");
                 if (modDoc.Root == null)
                 {
-                    logger.Warn("Mods/Mods.xml does not have root element. Mods could not be added. HINT: Delete Mods/Mods.xml. This WILL remove mod order!!!");
+                    logger.Warn("mods/mods.xml does not have root element. mods could not be added. HINT: Delete mods/mods.xml. This WILL remove mod order!!!");
                     return;
                 }
                 
@@ -111,7 +129,7 @@ namespace ModLoader
                         continue;
                     }
                     
-                    string modAssemblyPath = Path.Combine("Mods", modName, $"{modName}.dll");
+                    string modAssemblyPath = Path.Combine("mods", modName, $"{modName}.dll");
 
                     if (File.Exists(modAssemblyPath))
                     {
