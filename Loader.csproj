@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../ModAPI.Core/ModAPI.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Allumeria">
+      <HintPath>..\Allumeria.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
