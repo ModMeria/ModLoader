@@ -15,7 +15,7 @@ public class ModMeriaLoader : IExternalLoader
 
         Game.VERSION = fullVersion + $" with ModMeria {Version}";
 
-        ModApi.Api.Init();
+        ModApi api = new();
 
     }
 }
