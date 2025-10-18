@@ -46,7 +46,7 @@ public class ModMeriaLoader : IExternalLoader
         {
             Logger.Info($"{i + 1}) {modNames[i]}");
         }
-        Logger.Info();
+        Logger.Info("");
         
         foreach (var folder in modFolders)
         {
