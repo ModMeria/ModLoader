@@ -20,9 +20,11 @@ public class ModMeriaLoader : IExternalLoader
         Logger.Init($"Game version: {fullVersion}");
 
         Game.VERSION = fullVersion + $" with ModMeria {Version}";
+        
+        LoadMods();
     }
 
-    public void LoadMods()
+    private void LoadMods()
     {
         if (!Directory.Exists(_modsDirectory)) // This is dead code since modloader is ALWAYS in modsDirectory, but I included it just in case
         {
