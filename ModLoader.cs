@@ -41,12 +41,12 @@ public class ModMeriaLoader : IExternalLoader
             return;
         }
 
-        Console.WriteLine($"Found {modNames.Count} mod{(modNames.Count == 1 ? "" : "s")}:");
+        Logger.Info($"Found {modNames.Count} mod{(modNames.Count == 1 ? "" : "s")}:");
         for (var i = 0; i < modNames.Count; i++)
         {
-            Console.WriteLine($"{i + 1}) {modNames[i]}");
+            Logger.Info($"{i + 1}) {modNames[i]}");
         }
-        Console.WriteLine();
+        Logger.Info();
         
         foreach (var folder in modFolders)
         {
