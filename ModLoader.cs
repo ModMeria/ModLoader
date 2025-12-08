@@ -2,6 +2,7 @@
 using Allumeria;
 using ModAPI.Abstractions;
 using ModAPI.Core;
+using HarmonyLib;
 
 namespace Loader;
 
@@ -14,6 +15,7 @@ public class ModMeriaLoader : IExternalLoader
     
     public void Init()
     {
+        Logger.EnableFileMode();    
         Logger.Init("Initializing ModMeria...");
 
         string fullVersion = Game.VERSION;
@@ -33,7 +35,12 @@ public class ModMeriaLoader : IExternalLoader
         
         var modFolders = Directory.GetDirectories(_modsDirectory);
 
-        var modNames = modFolders.Select(Path.GetFileName).ToList();
+        List<string?> modNames = new();
+        modNames.Add("ModMeria");
+        modNames.Add("ModMeria API");
+        modNames.AddRange(modFolders.Select(Path.GetFileName).ToList());
+        
+        
 
         if (modNames.Count == 0)
         {
@@ -42,11 +49,13 @@ public class ModMeriaLoader : IExternalLoader
         }
 
         Logger.Info($"Found {modNames.Count} mod{(modNames.Count == 1 ? "" : "s")}:");
+        Game.VERSION += $"(with {modNames.Count} mods)";
         for (var i = 0; i < modNames.Count; i++)
         {
             Logger.Info($"{i + 1}) {modNames[i]}");
         }
         Logger.Info("");
+        LoadModMeria();
         
         foreach (var folder in modFolders)
         {
@@ -87,5 +96,13 @@ public class ModMeriaLoader : IExternalLoader
                 Logger.Error($"Failed to load mod {modName}: {exception.Message}");
             }
         }
+    }
+
+    private void LoadModMeria()
+    {
+        Logger.Info("Loading ModMeria...");
+        var harmony = new Harmony("com.github.modmeria.modmeria");
+        Harmony.DEBUG = true;
+        harmony.PatchAll();
     }
 }
